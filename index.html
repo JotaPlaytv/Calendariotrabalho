@@ -110,6 +110,7 @@
             color: #333;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
         }
 
         .day:active {
@@ -126,7 +127,6 @@
         }
 
         .day.work-day {
-            background: #10b981;
             color: white;
             font-weight: bold;
         }
@@ -135,28 +135,82 @@
             border: 3px solid #667eea;
         }
 
+        .day.has-note::after {
+            content: '📝';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+        }
+
         .controls {
             margin-top: 20px;
             padding-top: 20px;
             border-top: 2px solid #f0f0f0;
         }
 
-        .color-picker {
+        .categories-section {
+            margin-bottom: 20px;
+        }
+
+        .categories-section h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .category-list {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
             margin-bottom: 15px;
         }
 
-        .color-picker label {
-            color: #333;
-            font-weight: bold;
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
         }
 
-        .color-picker input[type="color"] {
+        .category-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+        }
+
+        .category-name {
+            flex: 1;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-delete-cat {
+            background: #ef4444;
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .add-category {
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-category input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .add-category input[type="color"] {
             width: 50px;
-            height: 40px;
-            border: none;
+            height: 42px;
+            border: 2px solid #ddd;
             border-radius: 8px;
             cursor: pointer;
         }
@@ -183,32 +237,177 @@
             background: #dc2626;
         }
 
-        .install-banner {
-            background: #667eea;
-            color: white;
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { 
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f0f0f0;
+            color: #666;
+            font-size: 24px;
+            width: 35px;
+            height: 35px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e0e0e0;
+            transform: rotate(90deg);
+        }
+
+        .category-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .category-option {
             padding: 15px;
             border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .category-option:active {
+            transform: scale(0.95);
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
             margin-bottom: 20px;
+        }
+
+        .note-section {
+            margin-top: 20px;
+        }
+
+        .note-section label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .note-display {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+            min-height: 100px;
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .note-display.empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .note-section textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            min-height: 100px;
+            resize: vertical;
             display: none;
-            align-items: center;
+        }
+
+        .note-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-buttons {
+            display: flex;
             gap: 10px;
+            margin-top: 20px;
         }
 
-        .install-banner button {
-            background: white;
-            color: #667eea;
-            padding: 8px 16px;
+        .modal-buttons button {
+            flex: 1;
         }
 
-        .install-banner button:hover {
-            background: #f0f0f0;
+        .edit-btn {
+            background: #f59e0b;
         }
 
-        .close-banner {
-            margin-left: auto;
-            background: transparent;
-            font-size: 20px;
-            padding: 5px 10px;
+        .save-btn {
+            background: #10b981;
+        }
+
+        .cancel-btn {
+            background: #6b7280;
+        }
+
+        .delete-btn {
+            background: #ef4444;
         }
 
         @media (max-width: 480px) {
@@ -224,25 +423,23 @@
                 padding: 8px 12px;
                 font-size: 14px;
             }
+
+            .modal {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="install-banner" id="installBanner">
-            <span>📲 Instale o app no seu celular!</span>
-            <button onclick="installApp()">Instalar</button>
-            <button class="close-banner" onclick="closeBanner()">×</button>
-        </div>
-
         <div class="header">
             <h1>📅 Meu Calendário</h1>
         </div>
 
         <div class="nav-buttons">
-            <button onclick="prevMonth()">◀ Anterior</button>
-            <button onclick="goToToday()">Hoje</button>
-            <button onclick="nextMonth()">Próximo ▶</button>
+            <button id="btnPrev">◀ Anterior</button>
+            <button id="btnNext">Próximo ▶</button>
+            <button id="btnToday">Hoje</button>
         </div>
 
         <div class="month-year" id="monthYear"></div>
@@ -260,9 +457,14 @@
         <div class="days" id="calendar"></div>
 
         <div class="controls">
-            <div class="color-picker">
-                <label>Cor dos dias de trabalho:</label>
-                <input type="color" id="colorPicker" value="#10b981" onchange="updateColor()">
+            <div class="categories-section">
+                <h3>🏢 Categorias de Trabalho</h3>
+                <div class="category-list" id="categoryList"></div>
+                <div class="add-category">
+                    <input type="text" id="newCategoryName" placeholder="Ex: Trabalho A">
+                    <input type="color" id="newCategoryColor" value="#10b981">
+                    <button id="btnAddCategory">➕</button>
+                </div>
             </div>
 
             <div class="stats">
@@ -270,65 +472,102 @@
                 <p id="workDaysCount">Dias de trabalho: 0</p>
             </div>
 
-            <button class="clear-btn" onclick="clearMonth()">Limpar mês atual</button>
+            <button class="clear-btn" id="btnClearMonth">Limpar mês atual</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal">
+            <button class="modal-close" id="closeCategoryModal">×</button>
+            <h2 id="categoryModalTitle">Escolha a categoria</h2>
+            <div class="category-selection" id="categorySelection"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="detailsModal">
+        <div class="modal">
+            <button class="modal-close" id="closeDetailsModal">×</button>
+            <h2 id="detailsTitle">Dia 15</h2>
+            
+            <div style="text-align: center;">
+                <span id="categoryBadge" class="category-badge"></span>
+            </div>
+
+            <div class="note-section">
+                <label>📝 Anotações:</label>
+                <div id="noteDisplay" class="note-display empty">Sem anotações</div>
+                <textarea id="noteInput" placeholder="Ex: Turno da manhã, reunião às 14h..."></textarea>
+            </div>
+
+            <div class="modal-buttons" id="viewButtons">
+                <button class="edit-btn" id="btnEdit">✏️ Editar</button>
+                <button class="delete-btn" id="btnDelete">🗑️ Remover</button>
+            </div>
+
+            <div class="modal-buttons" id="editButtons" style="display: none;">
+                <button class="save-btn" id="btnSave">💾 Salvar</button>
+                <button class="cancel-btn" id="btnCancel">❌ Cancelar</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Registrar Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(() => {
-                console.log('Service Worker registrado!');
-            });
-        }
-
-        // Variáveis de instalação PWA
-        let deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('installBanner').style.display = 'flex';
-        });
-
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('App instalado!');
-                    }
-                    deferredPrompt = null;
-                    closeBanner();
-                });
-            }
-        }
-
-        function closeBanner() {
-            document.getElementById('installBanner').style.display = 'none';
-        }
-
-        // Código do calendário
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
-        let workDays = loadData('workDays') || {};
-        let workColor = loadData('workColor') || '#10b981';
-
-        document.getElementById('colorPicker').value = workColor;
-
-        function saveData(key, value) {
-            localStorage.setItem(key, JSON.stringify(value));
-        }
-
-        function loadData(key) {
-            const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : null;
-        }
-
-        const monthNames = [
-            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        let workDays = JSON.parse(localStorage.getItem('workDays')) || {};
+        let categories = JSON.parse(localStorage.getItem('categories')) || [
+            {id: 'cat1', name: 'Trabalho A', color: '#10b981'},
+            {id: 'cat2', name: 'Trabalho B', color: '#3b82f6'}
         ];
+        let selectedDateKey = null;
+
+        const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+        function saveData() {
+            localStorage.setItem('workDays', JSON.stringify(workDays));
+            localStorage.setItem('categories', JSON.stringify(categories));
+        }
+
+        function renderCategories() {
+            const list = document.getElementById('categoryList');
+            list.innerHTML = '';
+            
+            categories.forEach(cat => {
+                const item = document.createElement('div');
+                item.className = 'category-item';
+                
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'category-color';
+                colorDiv.style.background = cat.color;
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'category-name';
+                nameDiv.textContent = cat.name;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-delete-cat';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm('Deletar esta categoria? Os dias marcados com ela serão removidos.')) {
+                        Object.keys(workDays).forEach(key => {
+                            if (workDays[key].categoryId === cat.id) {
+                                delete workDays[key];
+                            }
+                        });
+                        categories = categories.filter(c => c.id !== cat.id);
+                        saveData();
+                        renderCategories();
+                        renderCalendar();
+                    }
+                });
+                
+                item.appendChild(colorDiv);
+                item.appendChild(nameDiv);
+                item.appendChild(deleteBtn);
+                list.appendChild(item);
+            });
+        }
 
         function renderCalendar() {
             const calendar = document.getElementById('calendar');
@@ -356,34 +595,81 @@
                 
                 if (workDays[dateKey]) {
                     dayDiv.classList.add('work-day');
-                    dayDiv.style.background = workColor;
+                    const category = categories.find(c => c.id === workDays[dateKey].categoryId);
+                    if (category) {
+                        dayDiv.style.background = category.color;
+                    }
+                    
+                    if (workDays[dateKey].note && workDays[dateKey].note.trim()) {
+                        dayDiv.classList.add('has-note');
+                    }
                 }
 
-                if (day === today.getDate() && 
-                    currentMonth === today.getMonth() && 
-                    currentYear === today.getFullYear()) {
+                if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
                     dayDiv.classList.add('today');
                 }
 
-                dayDiv.onclick = () => toggleWorkDay(day, dayDiv, dateKey);
+                dayDiv.addEventListener('click', () => {
+                    selectedDateKey = dateKey;
+                    if (workDays[dateKey]) {
+                        openDetailsModal(day);
+                    } else {
+                        openCategoryModal(day);
+                    }
+                });
+                
                 calendar.appendChild(dayDiv);
             }
 
             updateStats();
         }
 
-        function toggleWorkDay(day, element, dateKey) {
-            if (workDays[dateKey]) {
-                delete workDays[dateKey];
-                element.classList.remove('work-day');
-                element.style.background = '';
-            } else {
-                workDays[dateKey] = true;
-                element.classList.add('work-day');
-                element.style.background = workColor;
+        function openCategoryModal(day) {
+            document.getElementById('categoryModalTitle').textContent = `Dia ${day} - ${monthNames[currentMonth]}`;
+            
+            const selection = document.getElementById('categorySelection');
+            selection.innerHTML = '';
+            
+            categories.forEach(cat => {
+                const option = document.createElement('div');
+                option.className = 'category-option';
+                option.style.background = cat.color;
+                option.textContent = cat.name;
+                option.addEventListener('click', () => {
+                    workDays[selectedDateKey] = { categoryId: cat.id, note: '' };
+                    saveData();
+                    document.getElementById('categoryModal').style.display = 'none';
+                    renderCalendar();
+                });
+                selection.appendChild(option);
+            });
+            
+            document.getElementById('categoryModal').style.display = 'flex';
+        }
+
+        function openDetailsModal(day) {
+            document.getElementById('detailsTitle').textContent = `Dia ${day} - ${monthNames[currentMonth]}`;
+            
+            const workDay = workDays[selectedDateKey];
+            const category = categories.find(c => c.id === workDay.categoryId);
+            
+            if (category) {
+                const badge = document.getElementById('categoryBadge');
+                badge.textContent = category.name;
+                badge.style.background = category.color;
             }
-            saveData('workDays', workDays);
-            updateStats();
+            
+            const note = workDay.note || '';
+            document.getElementById('noteDisplay').textContent = note.trim() ? note : 'Sem anotações';
+            document.getElementById('noteDisplay').className = note.trim() ? 'note-display' : 'note-display empty';
+            document.getElementById('noteInput').value = note;
+            
+            document.getElementById('noteDisplay').style.display = 'block';
+            document.getElementById('noteInput').style.display = 'none';
+            document.getElementById('viewButtons').style.display = 'flex';
+            document.getElementById('editButtons').style.display = 'none';
+            
+            document.getElementById('detailsModal').style.display = 'flex';
         }
 
         function updateStats() {
@@ -391,57 +677,120 @@
                 const [year, month] = key.split('-').map(Number);
                 return year === currentYear && month === currentMonth;
             }).length;
-            
             document.getElementById('workDaysCount').textContent = `Dias de trabalho: ${count}`;
         }
 
-        function updateColor() {
-            workColor = document.getElementById('colorPicker').value;
-            saveData('workColor', workColor);
-            const workDayElements = document.querySelectorAll('.day.work-day');
-            workDayElements.forEach(el => {
-                el.style.background = workColor;
-            });
-        }
-
-        function prevMonth() {
+        // Event Listeners
+        document.getElementById('btnPrev').addEventListener('click', () => {
             currentMonth--;
             if (currentMonth < 0) {
                 currentMonth = 11;
                 currentYear--;
             }
             renderCalendar();
-        }
+        });
 
-        function nextMonth() {
+        document.getElementById('btnNext').addEventListener('click', () => {
             currentMonth++;
             if (currentMonth > 11) {
                 currentMonth = 0;
                 currentYear++;
             }
             renderCalendar();
-        }
+        });
 
-        function goToToday() {
+        document.getElementById('btnToday').addEventListener('click', () => {
             const today = new Date();
             currentMonth = today.getMonth();
             currentYear = today.getFullYear();
             renderCalendar();
-        }
+        });
 
-        function clearMonth() {
+        document.getElementById('btnAddCategory').addEventListener('click', () => {
+            const name = document.getElementById('newCategoryName').value.trim();
+            const color = document.getElementById('newCategoryColor').value;
+            
+            if (!name) {
+                alert('Digite um nome para a categoria!');
+                return;
+            }
+
+            categories.push({ id: 'cat' + Date.now(), name: name, color: color });
+            saveData();
+            
+            document.getElementById('newCategoryName').value = '';
+            document.getElementById('newCategoryColor').value = '#10b981';
+            
+            renderCategories();
+        });
+
+        document.getElementById('btnClearMonth').addEventListener('click', () => {
             if (confirm('Tem certeza que deseja limpar todos os dias de trabalho deste mês?')) {
-                const keysToDelete = Object.keys(workDays).filter(key => {
+                Object.keys(workDays).forEach(key => {
                     const [year, month] = key.split('-').map(Number);
-                    return year === currentYear && month === currentMonth;
+                    if (year === currentYear && month === currentMonth) {
+                        delete workDays[key];
+                    }
                 });
-                
-                keysToDelete.forEach(key => delete workDays[key]);
-                saveData('workDays', workDays);
+                saveData();
                 renderCalendar();
             }
-        }
+        });
 
+        document.getElementById('closeCategoryModal').addEventListener('click', () => {
+            document.getElementById('categoryModal').style.display = 'none';
+        });
+
+        document.getElementById('closeDetailsModal').addEventListener('click', () => {
+            document.getElementById('detailsModal').style.display = 'none';
+        });
+
+        document.getElementById('btnEdit').addEventListener('click', () => {
+            document.getElementById('noteDisplay').style.display = 'none';
+            document.getElementById('noteInput').style.display = 'block';
+            document.getElementById('viewButtons').style.display = 'none';
+            document.getElementById('editButtons').style.display = 'flex';
+        });
+
+        document.getElementById('btnSave').addEventListener('click', () => {
+            workDays[selectedDateKey].note = document.getElementById('noteInput').value.trim();
+            saveData();
+            document.getElementById('detailsModal').style.display = 'none';
+            renderCalendar();
+        });
+
+        document.getElementById('btnCancel').addEventListener('click', () => {
+            const note = workDays[selectedDateKey].note || '';
+            document.getElementById('noteDisplay').textContent = note.trim() ? note : 'Sem anotações';
+            document.getElementById('noteDisplay').className = note.trim() ? 'note-display' : 'note-display empty';
+            document.getElementById('noteDisplay').style.display = 'block';
+            document.getElementById('noteInput').style.display = 'none';
+            document.getElementById('viewButtons').style.display = 'flex';
+            document.getElementById('editButtons').style.display = 'none';
+        });
+
+        document.getElementById('btnDelete').addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja remover este dia de trabalho?')) {
+                delete workDays[selectedDateKey];
+                saveData();
+                document.getElementById('detailsModal').style.display = 'none';
+                renderCalendar();
+            }
+        });
+
+        document.getElementById('categoryModal').addEventListener('click', (e) => {
+            if (e.target.id === 'categoryModal') {
+                document.getElementById('categoryModal').style.display = 'none';
+            }
+        });
+
+        document.getElementById('detailsModal').addEventListener('click', (e) => {
+            if (e.target.id === 'detailsModal') {
+                document.getElementById('detailsModal').style.display = 'none';
+            }
+        });
+
+        renderCategories();
         renderCalendar();
     </script>
 </body>
