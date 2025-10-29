@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Calendário para marcar dias de trabalho">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
+    <title>Calendário de Trabalho</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .month-year {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            color: #666;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f5f5f5;
+            color: #333;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .day:active {
+            transform: scale(0.95);
+        }
+
+        .day.empty {
+            cursor: default;
+            background: transparent;
+        }
+
+        .day.empty:active {
+            transform: none;
+        }
+
+        .day.work-day {
+            background: #10b981;
+            color: white;
+            font-weight: bold;
+        }
+
+        .day.today {
+            border: 3px solid #667eea;
+        }
+
+        .controls {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .color-picker label {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .color-picker input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .stats p {
+            color: #333;
+            margin: 5px 0;
+        }
+
+        .clear-btn {
+            background: #ef4444;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+
+        .install-banner {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .install-banner button {
+            background: white;
+            color: #667eea;
+            padding: 8px 16px;
+        }
+
+        .install-banner button:hover {
+            background: #f0f0f0;
+        }
+
+        .close-banner {
+            margin-left: auto;
+            background: transparent;
+            font-size: 20px;
+            padding: 5px 10px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="install-banner" id="installBanner">
+            <span>📲 Instale o app no seu celular!</span>
+            <button onclick="installApp()">Instalar</button>
+            <button class="close-banner" onclick="closeBanner()">×</button>
+        </div>
+
+        <div class="header">
+            <h1>📅 Meu Calendário</h1>
+        </div>
+
+        <div class="nav-buttons">
+            <button onclick="prevMonth()">◀ Anterior</button>
+            <button onclick="goToToday()">Hoje</button>
+            <button onclick="nextMonth()">Próximo ▶</button>
+        </div>
+
+        <div class="month-year" id="monthYear"></div>
+
+        <div class="weekdays">
+            <div class="weekday">Dom</div>
+            <div class="weekday">Seg</div>
+            <div class="weekday">Ter</div>
+            <div class="weekday">Qua</div>
+            <div class="weekday">Qui</div>
+            <div class="weekday">Sex</div>
+            <div class="weekday">Sáb</div>
+        </div>
+
+        <div class="days" id="calendar"></div>
+
+        <div class="controls">
+            <div class="color-picker">
+                <label>Cor dos dias de trabalho:</label>
+                <input type="color" id="colorPicker" value="#10b981" onchange="updateColor()">
+            </div>
+
+            <div class="stats">
+                <p><strong>Estatísticas do mês:</strong></p>
+                <p id="workDaysCount">Dias de trabalho: 0</p>
+            </div>
+
+            <button class="clear-btn" onclick="clearMonth()">Limpar mês atual</button>
+        </div>
+    </div>
+
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(() => {
+                console.log('Service Worker registrado!');
+            });
+        }
+
+        // Variáveis de instalação PWA
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').style.display = 'flex';
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('App instalado!');
+                    }
+                    deferredPrompt = null;
+                    closeBanner();
+                });
+            }
+        }
+
+        function closeBanner() {
+            document.getElementById('installBanner').style.display = 'none';
+        }
+
+        // Código do calendário
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let workDays = loadData('workDays') || {};
+        let workColor = loadData('workColor') || '#10b981';
+
+        document.getElementById('colorPicker').value = workColor;
+
+        function saveData(key, value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        }
+
+        function loadData(key) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        }
+
+        const monthNames = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+
+        function renderCalendar() {
+            const calendar = document.getElementById('calendar');
+            const monthYear = document.getElementById('monthYear');
+            
+            monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            calendar.innerHTML = '';
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'day empty';
+                calendar.appendChild(emptyDiv);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+                dayDiv.textContent = day;
+                
+                const dateKey = `${currentYear}-${currentMonth}-${day}`;
+                
+                if (workDays[dateKey]) {
+                    dayDiv.classList.add('work-day');
+                    dayDiv.style.background = workColor;
+                }
+
+                if (day === today.getDate() && 
+                    currentMonth === today.getMonth() && 
+                    currentYear === today.getFullYear()) {
+                    dayDiv.classList.add('today');
+                }
+
+                dayDiv.onclick = () => toggleWorkDay(day, dayDiv, dateKey);
+                calendar.appendChild(dayDiv);
+            }
+
+            updateStats();
+        }
+
+        function toggleWorkDay(day, element, dateKey) {
+            if (workDays[dateKey]) {
+                delete workDays[dateKey];
+                element.classList.remove('work-day');
+                element.style.background = '';
+            } else {
+                workDays[dateKey] = true;
+                element.classList.add('work-day');
+                element.style.background = workColor;
+            }
+            saveData('workDays', workDays);
+            updateStats();
+        }
+
+        function updateStats() {
+            const count = Object.keys(workDays).filter(key => {
+                const [year, month] = key.split('-').map(Number);
+                return year === currentYear && month === currentMonth;
+            }).length;
+            
+            document.getElementById('workDaysCount').textContent = `Dias de trabalho: ${count}`;
+        }
+
+        function updateColor() {
+            workColor = document.getElementById('colorPicker').value;
+            saveData('workColor', workColor);
+            const workDayElements = document.querySelectorAll('.day.work-day');
+            workDayElements.forEach(el => {
+                el.style.background = workColor;
+            });
+        }
+
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            renderCalendar();
+        }
+
+        function clearMonth() {
+            if (confirm('Tem certeza que deseja limpar todos os dias de trabalho deste mês?')) {
+                const keysToDelete = Object.keys(workDays).filter(key => {
+                    const [year, month] = key.split('-').map(Number);
+                    return year === currentYear && month === currentMonth;
+                });
+                
+                keysToDelete.forEach(key => delete workDays[key]);
+                saveData('workDays', workDays);
+                renderCalendar();
+            }
+        }
+
+        renderCalendar();
+    </script>
+</body>
+</html>
