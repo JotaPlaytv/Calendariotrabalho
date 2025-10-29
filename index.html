@@ -46,6 +46,16 @@
             font-size: 24px;
         }
 
+        .update-btn {
+            background: #10b981;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .update-btn:hover {
+            background: #059669;
+        }
+
         .nav-buttons {
             display: flex;
             gap: 10px;
@@ -434,6 +444,7 @@
     <div class="container">
         <div class="header">
             <h1>📅 Meu Calendário</h1>
+            <button class="update-btn" id="btnUpdate">🔄 Atualizar</button>
         </div>
 
         <div class="nav-buttons">
@@ -510,7 +521,6 @@
             </div>
         </div>
     </div>
-
     <script>
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
@@ -787,6 +797,33 @@
         document.getElementById('detailsModal').addEventListener('click', (e) => {
             if (e.target.id === 'detailsModal') {
                 document.getElementById('detailsModal').style.display = 'none';
+            }
+        });
+
+        document.getElementById('btnUpdate').addEventListener('click', () => {
+            if (confirm('Atualizar o aplicativo para a versão mais recente?')) {
+                // Limpa todo o cache
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        names.forEach(name => {
+                            caches.delete(name);
+                        });
+                    });
+                }
+                
+                // Desregistra o Service Worker
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        registrations.forEach(registration => {
+                            registration.unregister();
+                        });
+                    });
+                }
+                
+                // Recarrega a página
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 500);
             }
         });
 
