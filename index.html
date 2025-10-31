@@ -235,6 +235,25 @@
         .stats p {
             color: #333;
             margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .stats strong {
+            color: #667eea;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .stat-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            display: inline-block;
         }
 
         .clear-btn {
@@ -479,8 +498,8 @@
             </div>
 
             <div class="stats">
-                <p><strong>Estatísticas do mês:</strong></p>
-                <p id="workDaysCount">Dias de trabalho: 0</p>
+                <p><strong>📊 Estatísticas do mês:</strong></p>
+                <div id="statsContent"></div>
             </div>
 
             <button class="clear-btn" id="btnClearMonth">Limpar mês atual</button>
@@ -526,6 +545,7 @@
         let currentYear = new Date().getFullYear();
         let workDays = JSON.parse(localStorage.getItem('workDays')) || {};
         let categories = JSON.parse(localStorage.getItem('categories')) || [
+            {id: 'folga-extra', name: '🌴 Folga Extra', color: '#fbbf24', fixed: true},
             {id: 'cat1', name: 'Trabalho A', color: '#10b981'},
             {id: 'cat2', name: 'Trabalho B', color: '#3b82f6'}
         ];
@@ -555,26 +575,29 @@
                 nameDiv.className = 'category-name';
                 nameDiv.textContent = cat.name;
                 
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'btn-delete-cat';
-                deleteBtn.textContent = '🗑️';
-                deleteBtn.addEventListener('click', () => {
-                    if (confirm('Deletar esta categoria? Os dias marcados com ela serão removidos.')) {
-                        Object.keys(workDays).forEach(key => {
-                            if (workDays[key].categoryId === cat.id) {
-                                delete workDays[key];
-                            }
-                        });
-                        categories = categories.filter(c => c.id !== cat.id);
-                        saveData();
-                        renderCategories();
-                        renderCalendar();
-                    }
-                });
-                
                 item.appendChild(colorDiv);
                 item.appendChild(nameDiv);
-                item.appendChild(deleteBtn);
+                
+                if (!cat.fixed) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn-delete-cat';
+                    deleteBtn.textContent = '🗑️';
+                    deleteBtn.addEventListener('click', () => {
+                        if (confirm('Deletar esta categoria? Os dias marcados com ela serão removidos.')) {
+                            Object.keys(workDays).forEach(key => {
+                                if (workDays[key].categoryId === cat.id) {
+                                    delete workDays[key];
+                                }
+                            });
+                            categories = categories.filter(c => c.id !== cat.id);
+                            saveData();
+                            renderCategories();
+                            renderCalendar();
+                        }
+                    });
+                    item.appendChild(deleteBtn);
+                }
+                
                 list.appendChild(item);
             });
         }
@@ -683,11 +706,31 @@
         }
 
         function updateStats() {
-            const count = Object.keys(workDays).filter(key => {
+            const statsContent = document.getElementById('statsContent');
+            const categoryStats = {};
+            
+            // Conta dias por categoria no mês atual
+            Object.keys(workDays).forEach(key => {
                 const [year, month] = key.split('-').map(Number);
-                return year === currentYear && month === currentMonth;
-            }).length;
-            document.getElementById('workDaysCount').textContent = `Dias de trabalho: ${count}`;
+                if (year === currentYear && month === currentMonth) {
+                    const catId = workDays[key].categoryId;
+                    categoryStats[catId] = (categoryStats[catId] || 0) + 1;
+                }
+            });
+            
+            // Renderiza estatísticas
+            statsContent.innerHTML = '';
+            
+            categories.forEach(cat => {
+                const count = categoryStats[cat.id] || 0;
+                const statItem = document.createElement('div');
+                statItem.className = 'stat-item';
+                statItem.innerHTML = `
+                    <span class="stat-color" style="background: ${cat.color}"></span>
+                    <span>${cat.name}: <strong>${count} ${count === 1 ? 'dia' : 'dias'}</strong></span>
+                `;
+                statsContent.appendChild(statItem);
+            });
         }
 
         // Event Listeners
@@ -732,6 +775,7 @@
             document.getElementById('newCategoryColor').value = '#10b981';
             
             renderCategories();
+            updateStats();
         });
 
         document.getElementById('btnClearMonth').addEventListener('click', () => {
@@ -802,7 +846,6 @@
 
         document.getElementById('btnUpdate').addEventListener('click', () => {
             if (confirm('Atualizar o aplicativo para a versão mais recente?')) {
-                // Limpa todo o cache
                 if ('caches' in window) {
                     caches.keys().then(names => {
                         names.forEach(name => {
@@ -811,7 +854,6 @@
                     });
                 }
                 
-                // Desregistra o Service Worker
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(registrations => {
                         registrations.forEach(registration => {
@@ -820,7 +862,6 @@
                     });
                 }
                 
-                // Recarrega a página
                 setTimeout(() => {
                     window.location.reload(true);
                 }, 500);
